@@ -193,6 +193,9 @@ func (rl resultList) DotResult() []*dot.Result {
 	return types
 }
 
+/**
+wangyang 这里是返回 结果参数，也就是函数返回值参数
+*/
 func newResultList(ctype reflect.Type, opts resultOptions) (resultList, error) {
 	rl := resultList{
 		ctype:         ctype,
@@ -200,6 +203,9 @@ func newResultList(ctype reflect.Type, opts resultOptions) (resultList, error) {
 		resultIndexes: make([]int, ctype.NumOut()),
 	}
 
+	/**
+	返回函数的出参
+	*/
 	resultIdx := 0
 	for i := 0; i < ctype.NumOut(); i++ {
 		t := ctype.Out(i)

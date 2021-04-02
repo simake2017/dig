@@ -53,21 +53,22 @@ type param interface {
 }
 
 var (
-	_ param = paramSingle{}
-	_ param = paramObject{}
-	_ param = paramList{}
-	_ param = paramGroupedSlice{}
+	_ param = paramSingle{}       // single 类型
+	_ param = paramObject{}       // object 类型
+	_ param = paramList{}         //list 类型
+	_ param = paramGroupedSlice{} // 组类型
 )
 
 // newParam builds a param from the given type. If the provided type is a
 // dig.In struct, an paramObject will be returned.
 func newParam(t reflect.Type) (param, error) {
 	switch {
+	//这里判断是 dig.Out 类型
 	case IsOut(t) || (t.Kind() == reflect.Ptr && IsOut(t.Elem())) || embedsType(t, _outPtrType):
 		return nil, errf("cannot depend on result objects", "%v embeds a dig.Out", t)
-	case IsIn(t):
+	case IsIn(t): //如果是 dig.in类型 那么就是 paramObject 这里指的是包含 dig.in的一个结构体
 		return newParamObject(t)
-	case embedsType(t, _inPtrType):
+	case embedsType(t, _inPtrType): //这里是 直接 的dig.in类型
 		return nil, errf(
 			"cannot build a parameter object by embedding *dig.In, embed dig.In instead",
 			"%v embeds *dig.In", t)
@@ -161,8 +162,11 @@ func (pl paramList) DotParam() []*dot.Param {
 //
 // Variadic arguments of a constructor are ignored and not included as
 // dependencies.
+/**
+wangyang 这里用于获取 构造函数的参数
+*/
 func newParamList(ctype reflect.Type) (paramList, error) {
-	numArgs := ctype.NumIn()
+	numArgs := ctype.NumIn() //返回函数的入参
 	if ctype.IsVariadic() {
 		// NOTE: If the function is variadic, we skip the last argument
 		// because we're not filling variadic arguments yet. See #120.
@@ -174,6 +178,9 @@ func newParamList(ctype reflect.Type) (paramList, error) {
 		Params: make([]param, 0, numArgs),
 	}
 
+	/**
+	将 param 封装到 paramList 中
+	*/
 	for i := 0; i < numArgs; i++ {
 		p, err := newParam(ctype.In(i))
 		if err != nil {
@@ -198,6 +205,9 @@ func (pl paramList) BuildList(c containerStore) ([]reflect.Value, error) {
 	args := make([]reflect.Value, len(pl.Params))
 	for i, p := range pl.Params {
 		var err error
+		/**
+		这里将 paramList 对象构建好
+		*/
 		args[i], err = p.Build(c)
 		if err != nil {
 			return nil, err
@@ -228,11 +238,16 @@ func (ps paramSingle) DotParam() []*dot.Param {
 	}
 }
 
+/**
+wangyang ** 最终的构建都会使用到 paramSingle
+*/
 func (ps paramSingle) Build(c containerStore) (reflect.Value, error) {
 	if v, ok := c.getValue(ps.Name, ps.Type); ok {
 		return v, nil
 	}
 
+	//如果上面 不存在 相应的值，那么这里获取相应的 value provider
+	//之类是找到 相关的所有 provider
 	providers := c.getValueProviders(ps.Name, ps.Type)
 	if len(providers) == 0 {
 		if ps.Optional {
@@ -301,8 +316,11 @@ func newParamObject(t reflect.Type) (paramObject, error) {
 		}
 	}
 
+	/**
+	遍历 所有的 字段数量，使用反射 来获取
+	*/
 	for i := 0; i < t.NumField(); i++ {
-		f := t.Field(i)
+		f := t.Field(i) //这里获取的 是 StructField 字段类型
 		if f.Type == _inType {
 			// Skip over the dig.In embed.
 			continue
@@ -323,8 +341,8 @@ func newParamObject(t reflect.Type) (paramObject, error) {
 }
 
 func (po paramObject) Build(c containerStore) (reflect.Value, error) {
-	dest := reflect.New(po.Type).Elem()
-	for _, f := range po.Fields {
+	dest := reflect.New(po.Type).Elem() //创建一个 类型 实例对象
+	for _, f := range po.Fields {       //遍历所有的字段
 		v, err := f.Build(c)
 		if err != nil {
 			return dest, err

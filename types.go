@@ -57,6 +57,9 @@ type digSentinel interface {
 //   group       Name of the Value Group from which this field will be filled.
 //               The field must be a slice type. See Value Groups in the
 //               package documentation for more information.
+/**
+结构体可以结合一个 interface类型
+*/
 type In struct{ digSentinel }
 
 // Out is an embeddable type that signals to dig that the returned
@@ -113,6 +116,9 @@ func IsOut(o interface{}) bool {
 }
 
 // Returns true if t embeds e or if any of the types embedded by t embed e.
+/**
+wangyang 判断是否是 内置类型 也就是 dig.In ，如果
+*/
 func embedsType(i interface{}, e reflect.Type) bool {
 	// TODO: this function doesn't consider e being a pointer.
 	// given `type A foo { *In }`, this function would return false for
@@ -132,13 +138,14 @@ func embedsType(i interface{}, e reflect.Type) bool {
 	}
 
 	// We are going to do a breadth-first search of all embedded fields.
-	types := list.New()
-	types.PushBack(t)
+	types := list.New() //创建 list
+	types.PushBack(t)   //将t类型放入 back(最后位置)
 	for types.Len() > 0 {
+		// 这里就是 从前往后开始遍历 每个字段 , 然后转为反射类型
 		t := types.Remove(types.Front()).(reflect.Type)
 
 		if t == e {
-			return true
+			return true //如果是内置类型
 		}
 
 		if t.Kind() != reflect.Struct {

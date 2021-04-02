@@ -21,6 +21,7 @@
 package dig
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -55,6 +56,17 @@ type Option interface {
 	applyOption(*Container)
 }
 
+/**
+optionFunc 是函数类型，函数类型
+也可以有 自己的函数
+*/
+//func test() {
+//	var t optionFunc
+//	t = func(j *Container) {
+//
+//	}
+//	t.applyOption() //--> 使用这个 applyOption 作为标准apply函数 , 然后执行的时候执行t 本身
+//}
 type optionFunc func(*Container)
 
 func (f optionFunc) applyOption(c *Container) { f(c) }
@@ -371,9 +383,13 @@ func (c *Container) invoker() invokerFn {
 // specify results as dig.Out structs.
 func (c *Container) Provide(constructor interface{}, opts ...ProvideOption) error {
 	ctype := reflect.TypeOf(constructor)
+	//marshal, _ := json.Marshal(ctype)
+	//ctype 包含 参数与
+	fmt.Println("ctype==>", ctype) //--> func(*dig_test.Config) *log.Logger
 	if ctype == nil {
 		return errors.New("can't provide an untyped nil")
 	}
+	//如果 kind 不是func 就会 打印错误
 	if ctype.Kind() != reflect.Func {
 		return errf("must provide constructor function, got %v (type %v)", constructor, ctype)
 	}
@@ -437,6 +453,7 @@ func (c *Container) Invoke(function interface{}, opts ...InvokeOption) error {
 			Reason: err,
 		}
 	}
+	// 使用的反射的 方式调用 invokerFn
 	returned := c.invokerFn(reflect.ValueOf(function), args)
 	if len(returned) == 0 {
 		return nil
@@ -463,6 +480,7 @@ func (c *Container) verifyAcyclic() error {
 }
 
 func (c *Container) provide(ctor interface{}, opts provideOptions) error {
+	//
 	n, err := newNode(
 		ctor,
 		nodeOptions{
@@ -484,9 +502,13 @@ func (c *Container) provide(ctor interface{}, opts provideOptions) error {
 		return errf("%v must provide at least one non-error type", ctype)
 	}
 
+	/**
+
+	 */
 	for k := range keys {
 		c.isVerifiedAcyclic = false
 		oldProviders := c.providers[k]
+		// 这里对provider 进行标记
 		c.providers[k] = append(c.providers[k], n)
 
 		if c.deferAcyclicVerification {
@@ -654,22 +676,32 @@ func newNode(ctor interface{}, opts nodeOptions) (*node, error) {
 	ctype := cval.Type()
 	cptr := cval.Pointer()
 
-	params, err := newParamList(ctype)
+	params, err := newParamList(ctype) // 结构化 入参列表
+
+	marshal, _ := json.Marshal(params)
+	fmt.Println("params==>", string(marshal))
 	if err != nil {
 		return nil, err
 	}
 
-	results, err := newResultList(
+	results, err := newResultList( // 结构化出参列表
 		ctype,
 		resultOptions{
 			Name:  opts.ResultName,
 			Group: opts.ResultGroup,
 		},
 	)
+
+	bytes, _ := json.Marshal(results)
+	fmt.Println("bytes==>", string(bytes))
+
 	if err != nil {
 		return nil, err
 	}
 
+	/**
+	每个函数结构化为一个 node
+	*/
 	return &node{
 		ctor:       ctor,
 		ctype:      ctype,
@@ -760,7 +792,7 @@ func shallowCheckDependencies(c containerStore, p param) error {
 	var err errMissingTypes
 	var addMissingNodes []*dot.Param
 	walkParam(p, paramVisitorFunc(func(p param) bool {
-		ps, ok := p.(paramSingle)
+		ps, ok := p.(paramSingle) //判断是否能转换
 		if !ok {
 			return true
 		}
