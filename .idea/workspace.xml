@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="3ce28206-491b-472e-a99d-ad997a267184" name="默认变更列表" comment="">
-      <change beforePath="$PROJECT_DIR$/dig.go" beforeDir="false" afterPath="$PROJECT_DIR$/dig.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/digreflect/func.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/digreflect/func.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/param.go" beforeDir="false" afterPath="$PROJECT_DIR$/param.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/result.go" beforeDir="false" afterPath="$PROJECT_DIR$/result.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types.go" beforeDir="false" afterPath="$PROJECT_DIR$/types.go" afterDir="false" />
+    <list default="true" id="3ce28206-491b-472e-a99d-ad997a267184" name="默认变更列表" comment="注释内容">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -175,6 +171,22 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="注释内容" />
+    <option name="LAST_COMMIT_MESSAGE" value="注释内容" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
